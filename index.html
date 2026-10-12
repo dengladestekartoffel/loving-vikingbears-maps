@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mrs and Mr VikingBears Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#b8942a">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--g9:#1a1508;--g8:#3d2e0a;--g7:#8a6d1b;--g6:#b8942a;--g5:#d4af37;--g4:#e8c547;--g2:#f0e6c8;--g1:#f7f1dc;--g0:#faf7ef;--ink:#1c1a14;--mut:#6b6352;--line:#e5dcc4;--sh:0 6px 24px rgba(138,109,27,.22);--sil:#a8b0b8;--sil2:#c8d0d8;--sil3:#e8ecef}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--g0)}
+#map{position:absolute;inset:0 0 0 340px;background-color:#e8e4d8;background-image:linear-gradient(rgba(184,148,42,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(184,148,42,.14) 1px,transparent 1px);background-size:64px 64px}
+#side{position:absolute;top:0;left:0;bottom:0;width:340px;background:#fff;box-shadow:var(--sh);z-index:1000;display:flex;flex-direction:column;transition:transform .25s}
+.head{padding:18px 18px 12px;text-align:center;border-bottom:1px solid var(--line)}
+.logo{width:72px;height:72px;margin:0 auto 8px;border-radius:18px;background:linear-gradient(135deg,var(--g7),var(--g4));display:grid;place-items:center;color:#fff;font-weight:800;font-size:26px;box-shadow:0 4px 14px rgba(17,87,58,.3)}
+.head h1{margin:0;font-size:1.05rem;color:var(--g8);font-weight:700}
+.head small{color:var(--mut)}
+.btns{display:flex;gap:8px;padding:12px 16px 4px}
+button{font:inherit;cursor:pointer}
+.b{flex:1;padding:8px 10px;border-radius:10px;border:1.5px solid var(--g6);background:#fff;color:var(--g7);font-weight:600;transition:.15s}
+.b:hover{background:var(--g6);color:#fff}
+.b.p{background:var(--g6);color:#fff}.b.p:hover{background:var(--g8)}
+.sr{padding:8px 16px}
+.sr input{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--g0);font:inherit;color:var(--ink);outline:0}
+.sr input:focus{border-color:var(--g5);box-shadow:0 0 0 3px rgba(34,160,107,.2)}
+.prog{padding:2px 16px 8px;font-size:.8rem;color:var(--mut)}
+.bar{height:6px;border-radius:9px;background:var(--g1);overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;width:0;background:var(--g5);transition:width .3s}
+#cats{flex:1;overflow:auto;padding:0 12px 12px}
+.gh{margin:12px 0 6px;padding:7px 12px;background:var(--g1);color:var(--g8);border-left:4px solid var(--g6);border-radius:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:.76rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.ci{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;cursor:pointer;user-select:none;position:relative;min-width:0;opacity:.45;transition:.12s}
+.ci.on{opacity:1;background:var(--g0);font-weight:600}
+.ci:hover{background:var(--g1)}
+.ci .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.86rem}
+.ci .n{color:var(--g7);font-weight:700;font-size:.78rem}
+.ci .add{display:none;border:0;background:var(--g6);color:#fff;border-radius:6px;width:20px;height:20px;line-height:18px;padding:0;font-weight:700}
+.ci:hover .add{display:block}.ci:hover .n{display:none}
+.ci.placing{outline:2px solid var(--g5)}
+.ic{flex:none;width:20px;height:26px;background-repeat:no-repeat}
+.foot{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.foot .b{font-size:.8rem;padding:6px}
+.pin{width:33px;height:44px;background-repeat:no-repeat;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.pin.found{opacity:.4;filter:grayscale(1)}
+.leaflet-container{font-family:inherit}
+.leaflet-popup-content-wrapper{border-radius:14px;border-top:4px solid var(--g6);box-shadow:var(--sh);color:var(--ink)}
+.leaflet-popup-content{margin:12px 14px;min-width:190px}
+.pp h3{margin:0 0 2px;color:var(--g8);font-size:1rem}
+.pp .c{color:var(--mut);font-size:.8rem;margin-bottom:8px}
+.pp input[type=text]{width:100%;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;font:inherit;margin-bottom:8px}
+.pp label{display:flex;gap:6px;align-items:center;font-size:.88rem;margin-bottom:8px}
+.pp .row{display:flex;gap:6px}.pp .b{padding:5px 8px;font-size:.8rem}
+.pp .inf{font-size:.8rem;color:var(--mut);margin-bottom:8px}
+.leaflet-bar{border:0!important;box-shadow:var(--sh)!important;border-radius:12px!important;overflow:hidden}
+.leaflet-bar a{color:var(--g7)!important;border-color:var(--line)!important}.leaflet-bar a:hover{background:var(--g1)!important}
+.leaflet-control-attribution{background:rgba(255,255,255,.85)!important;color:var(--mut)!important}
+#coords{position:absolute;left:352px;bottom:12px;z-index:900;background:#fff;border-radius:10px;padding:5px 10px;font-size:.78rem;color:var(--mut);box-shadow:var(--sh)}
+#banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1100;background:var(--g7);color:#fff;border-radius:12px;padding:8px 14px;box-shadow:var(--sh);display:none;font-size:.88rem;white-space:nowrap}
+#banner button{margin-left:10px;background:#fff;color:var(--g7);border:0;border-radius:8px;padding:3px 10px;font-weight:700}
+#toast{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);z-index:1100;background:#fff;color:var(--ink);border-left:4px solid var(--g6);border-radius:10px;padding:10px 14px;box-shadow:var(--sh);display:none;max-width:90%;font-size:.85rem}
+#tog{display:none;position:absolute;top:12px;left:12px;z-index:1200;width:44px;height:44px;border:0;border-radius:12px;background:var(--g7);color:#fff;font-size:20px;box-shadow:var(--sh);-webkit-tap-highlight-color:transparent}
+#scrim{display:none;position:fixed;inset:0;background:rgba(26,21,8,.45);z-index:950}
+
+/* Access gate */
+#gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#1a1508 0%,#3d2e0a 40%,#8a6d1b 100%);display:flex;align-items:center;justify-content:center;padding:24px;padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
+#gate.ok{display:none}
+.gate-box{background:#fff;border-radius:18px;padding:28px 26px;width:100%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}
+.gate-box .logo{margin:0 auto 14px}
+.gate-box h2{margin:0 0 6px;font-size:1.15rem;color:var(--g8)}
+.gate-box p{margin:0 0 16px;font-size:.85rem;color:var(--mut);line-height:1.4}
+.gate-box label{display:block;text-align:left;font-size:.75rem;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.gate-box input{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;margin-bottom:12px;background:var(--g0);font-size:16px}
+.gate-box input:focus{border-color:var(--g5);outline:0;box-shadow:0 0 0 3px rgba(184,148,42,.25)}
+.gate-box .b{width:100%;padding:12px;margin-top:4px;font-size:1rem;min-height:44px}
+.gate-err{color:#b33;font-size:.85rem;min-height:1.2em;margin:8px 0 0;display:none}
+.gate-err.show{display:block}
+.gate-status{font-size:.8rem;color:var(--mut);margin-top:10px;min-height:1.2em}
+#app{display:none;position:relative;height:100%;width:100%}
+#app.open{display:block}
+
+/* Mobile */
+@media(max-width:768px){
+  #map{left:0;right:0;bottom:0;top:0}
+  #side{transform:translateX(-100%);width:min(92vw,340px);max-width:100%;z-index:1100;padding-bottom:env(safe-area-inset-bottom)}
+  #side.open{transform:none}
+  #tog{display:flex;align-items:center;justify-content:center;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left))}
+  #coords{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));font-size:.7rem;padding:4px 8px}
+  .leaflet-top.leaflet-left{margin-left:56px;margin-top:max(8px,env(safe-area-inset-top))}
+  .leaflet-top.leaflet-right{margin-top:max(8px,env(safe-area-inset-top));margin-right:max(8px,env(safe-area-inset-right))}
+  #banner{left:12px;right:12px;transform:none;width:auto;max-width:none;white-space:normal;text-align:center;font-size:.82rem;top:max(12px,env(safe-area-inset-top));padding:10px 12px}
+  #banner button{display:inline-block;margin:6px 0 0;margin-left:0}
+  #toast{bottom:max(60px,env(safe-area-inset-bottom));left:12px;right:12px;transform:none;max-width:none}
+  .ci{padding:8px 8px;min-height:40px}
+  .ci .add{display:flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:1.1rem}
+  .ci .n{display:none}
+  .ci.on .n{display:none}
+  .head{padding:14px 14px 10px}
+  .logo{width:56px;height:56px;font-size:22px;border-radius:14px}
+  .head h1{font-size:.95rem}
+  .btns{padding:10px 12px 4px}
+  .b{padding:10px;min-height:40px}
+  .sr{padding:8px 12px}
+  .sr input{font-size:16px;padding:10px 12px}
+  .prog{padding:2px 12px 8px;font-size:.75rem}
+  #cats{padding:0 8px 12px;-webkit-overflow-scrolling:touch}
+  .foot{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  .leaflet-popup-content{margin:10px 12px;min-width:160px;max-width:min(280px,85vw)}
+  .pp .b{padding:8px 10px;min-height:36px}
+  .pp input[type=text]{font-size:16px;padding:8px}
+  .pp label{font-size:.95rem;padding:4px 0}
+  #scrim.show{display:block}
+  #side.open~#scrim,body.side-open #scrim{display:block}
+}
+@media(max-width:380px){
+  .grid{grid-template-columns:1fr}
+  #side{width:100%}
+  .gate-box{padding:22px 18px}
+}
+
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="gate-box">
+    <div class="logo">VB</div>
+    <h2>Mrs and Mr VikingBears Map</h2>
+    <p>Indtast adgangskode for at åbne kortet.</p>
+    <label for="gateCode">Adgangskode</label>
+    <input id="gateCode" type="password" placeholder="Adgangskode..." autocomplete="off" maxlength="32">
+    <button class="b p" id="gateBtn">Åbn kort</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+<div id="app">
+<button id="tog" aria-label="Menu">☰</button>
+<div id="scrim"></div>
+<aside id="side">
+  <div class="head"><div class="logo">VB</div><h1>Mrs and Mr VikingBears Map</h1><small>Big Walk · Interactive Map</small></div>
+
+  <div class="btns"><button class="b p" id="showAll">Show All</button><button class="b" id="hideAll">Hide All</button></div>
+  <div class="sr"><input id="q" type="search" placeholder="Search... " autocomplete="off"></div>
+  <div class="prog"><span id="progTxt"></span><div class="bar"><i id="progBar"></i></div></div>
+  <div id="cats"></div>
+  <div class="foot"><button class="b" id="exp">Export</button><button class="b" id="imp">Import</button><button class="b" id="clr">Clear pins</button></div>
+</aside>
+<div id="map"></div>
+<div id="coords">lat, lng</div>
+<div id="banner"></div>
+<div id="toast"></div>
+<input type="file" id="file" accept="application/json" hidden>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const D={"groups": [{"title": "Locations", "categories": [{"id": 27065, "title": "Point of Interest", "icon": "point_of_interest", "count": 15, "info": null, "template": null}, {"id": 27066, "title": "Puzzle", "icon": "puzzle", "count": 45, "info": null, "template": "**Location:** ??\n\n**Solution:** ??\n\n**Reward:** ??"}, {"id": 27068, "title": "Key Cutter", "icon": "key_cutter", "count": 25, "info": null, "template": "**Next:** ??"}, {"id": 27069, "title": "Music Station", "icon": "radio_station", "count": 7, "info": "Activating music stations will allow a song to be played on that frequency and played through the music players!", "template": "**Location:** ??"}, {"id": 27071, "title": "Firework Launcher", "icon": "firework_launcher", "count": 8, "info": null, "template": null}, {"id": 27072, "title": "Tower", "icon": "tower", "count": 5, "info": null, "template": null}, {"id": 27073, "title": "Key Holder", "icon": "key_holder", "count": 7, "info": null, "template": "**Unlocks:** ??\n\n**Requires:** ??"}, {"id": 27075, "title": "Train Station", "icon": "train_station", "count": 7, "info": null, "template": null}, {"id": 27078, "title": "Lift Station", "icon": "lift_station", "count": 5, "info": null, "template": null}]}, {"title": "Items", "categories": [{"id": 27080, "title": "Scanner", "icon": "scanner", "count": 7, "info": null, "template": null}, {"id": 27081, "title": "Music Player", "icon": "music_player", "count": 9, "info": null, "template": null}, {"id": 27082, "title": "Flashlight", "icon": "flashlight", "count": 9, "info": null, "template": null}, {"id": 27083, "title": "Flare Gun", "icon": "flare_gun", "count": 4, "info": null, "template": null}, {"id": 27084, "title": "Backpack", "icon": "backpack", "count": 6, "info": null, "template": null}, {"id": 27085, "title": "Hip Pack", "icon": "hip_pack", "count": 5, "info": null, "template": null}, {"id": 27086, "title": "Megaphone", "icon": "megaphone", "count": 3, "info": null, "template": null}, {"id": 27087, "title": "Walkie-Talkie", "icon": "walkie_talkie", "count": 8, "info": null, "template": null}, {"id": 27088, "title": "Double Blob Holder", "icon": "double_blob_holder", "count": 1, "info": null, "template": null}, {"id": 27089, "title": "Clock", "icon": "clock", "count": 6, "info": null, "template": null}, {"id": 27090, "title": "Map", "icon": "map", "count": 1, "info": null, "template": null}, {"id": 27091, "title": "Compass", "icon": "compass", "count": 1, "info": null, "template": null}, {"id": 27092, "title": "Binoculars", "icon": "binoculars", "count": 7, "info": null, "template": null}, {"id": 27093, "title": "Laser Pointer", "icon": "laser_pointer", "count": 5, "info": null, "template": null}, {"id": 27094, "title": "Whiteboard", "icon": "whiteboard", "count": 2, "info": null, "template": null}, {"id": 27095, "title": "Coordinate Displayer", "icon": "coordinate_displayer", "count": 1, "info": null, "template": null}]}, {"title": "Other", "categories": [{"id": 27070, "title": "Key", "icon": "key", "count": 7, "info": null, "template": "**Location:** ??\n\n**Unlocks:** ??"}, {"id": 27074, "title": "Radio Transmitter", "icon": "radio_transmitter", "count": 7, "info": "Transmits audio from the transmitter to all walkie-talkies!", "template": "**Location:** ??"}, {"id": 27079, "title": "Miscellaneous", "icon": "miscellaneous", "count": 17, "info": null, "template": null}]}], "spr": {"27065": {"x": 0, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27066": {"x": 66, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27067": {"x": 66, "y": 352, "width": 66, "height": 88, "pixelRatio": 2}, "27068": {"x": 132, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27069": {"x": 198, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27070": {"x": 132, "y": 352, "width": 66, "height": 88, "pixelRatio": 2}, "27071": {"x": 264, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27072": {"x": 330, "y": 0, "width": 66, "height": 88, "pixelRatio": 2}, "27073": {"x": 0, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27074": {"x": 198, "y": 352, "width": 66, "height": 88, "pixelRatio": 2}, "27075": {"x": 66, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27078": {"x": 132, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27079": {"x": 264, "y": 352, "width": 66, "height": 88, "pixelRatio": 2}, "27080": {"x": 198, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27081": {"x": 264, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27082": {"x": 330, "y": 88, "width": 66, "height": 88, "pixelRatio": 2}, "27083": {"x": 0, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27084": {"x": 66, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27085": {"x": 132, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27086": {"x": 198, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27087": {"x": 264, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27088": {"x": 330, "y": 176, "width": 66, "height": 88, "pixelRatio": 2}, "27089": {"x": 0, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27090": {"x": 66, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27091": {"x": 132, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27092": {"x": 198, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27093": {"x": 264, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27094": {"x": 330, "y": 264, "width": 66, "height": 88, "pixelRatio": 2}, "27095": {"x": 0, "y": 352, "width": 66, "height": 88, "pixelRatio": 2}}, "lat": 0.69877288342981, "lng": -0.82763764741398, "zoom": 11, "minZoom": 8, "maxZoom": 14, "nativeMax": 13, "tile": "https://tiles.mapgenie.io/games/big-walk/island/default-v1/{z}/{y}/{x}.jpg"};
+if(typeof L==='undefined'){document.body.insertAdjacentHTML('afterbegin','<div style="position:absolute;inset:0;display:grid;place-items:center;z-index:5000;background:#f3fbf7;color:#3d2e0a;font:16px system-ui;text-align:center;padding:24px"><div><h2>Kortbiblioteket kunne ikke indlæses</h2><p>Siden skal åbnes direkte i din browser (Chrome, Edge, Safari eller Firefox) med internetforbindelse, og ikke i en forhåndsvisning.</p></div></div>');throw new Error('Leaflet missing')}
+
+/* === Access gate: kun adgangskode === */
+const ACCESS_CODE='20261974';
+const GATE_KEY='bigwalk_gate_v1';
+let appStarted=false;
+const $=s=>document.querySelector(s);
+
+function unlockApp(){
+  $('#gate').classList.add('ok');
+  $('#app').classList.add('open');
+  try{sessionStorage.setItem(GATE_KEY,'1')}catch(e){}
+  if(!appStarted){appStarted=true;startApp()}
+  else if(window._map){setTimeout(()=>window._map.invalidateSize(),50)}
+}
+
+function showGateErr(msg){
+  const e=$('#gateErr');e.textContent=msg;e.classList.add('show');
+}
+
+function tryGate(){
+  const code=($('#gateCode').value||'').trim();
+  const err=$('#gateErr');
+  err.classList.remove('show');err.textContent='';
+  if(code!==ACCESS_CODE){showGateErr('Forkert adgangskode');return}
+  unlockApp();
+}
+
+$('#gateBtn').onclick=tryGate;
+$('#gateCode').addEventListener('keydown',e=>{if(e.key==='Enter')tryGate()});
+setTimeout(()=>{try{$('#gateCode').focus()}catch(e){}},100);
+/* Auto-unlock samme session */
+try{
+  if(sessionStorage.getItem(GATE_KEY)==='1') unlockApp();
+}catch(e){}
+
+const SPR_URL='https://media.mapgenie.io/v2/assets/prod/games/big-walk/markers/markers@2x.png?v=11';
+const SW=396,SH=440;
+const cats={};D.groups.forEach(g=>g.categories.forEach(c=>cats[c.id]=c));
+const KEY='bigwalk_pins_v1',VKEY='bigwalk_vis_v1';
+let pins=[],vis={},placing=null;
+const DEFAULT_PINS=[{"id": 930178, "cat": 27066, "lat": 0.70061462713061, "lng": -0.75287977476404, "name": "Basketball Puzzle (Rød Bean)", "found": false}, {"id": 930167, "cat": 27092, "lat": 0.80060797192696, "lng": -0.81813812255746, "name": "Binoculars", "found": false}, {"id": 930173, "cat": 27087, "lat": 0.76339310677368, "lng": -0.78034043312064, "name": "Blue Walkie-Talkie", "found": false}, {"id": 930177, "cat": 27066, "lat": 0.67886402229185, "lng": -0.77167058787003, "name": "Cannon Puzzle (Rød Bean)", "found": false}, {"id": 930174, "cat": 27065, "lat": 0.81146447962001, "lng": -0.80856800079462, "name": "Checkpoint", "found": false}, {"id": 930158, "cat": 27065, "lat": 0.8360309748256, "lng": -0.83551883697712, "name": "Checkpoint", "found": false}, {"id": 930176, "cat": 27089, "lat": 0.68595972783798, "lng": -0.78087862088188, "name": "Clock", "found": false}, {"id": 930150, "cat": 27068, "lat": 0.85754586894073, "lng": -0.95830076412329, "name": "Fifth Section Gray Key Cutter", "found": false}, {"id": 930189, "cat": 27068, "lat": 0.82633110704248, "lng": -0.82065362330522, "name": "Fifth Section Red Key Cutter", "found": false}, {"id": 930134, "cat": 27071, "lat": 0.83151332952605, "lng": -0.90844567838116, "name": "Firework Launcher", "found": false}, {"id": 930165, "cat": 27071, "lat": 0.79520116288265, "lng": -0.81444740295302, "name": "Firework Launcher", "found": false}, {"id": 930157, "cat": 27071, "lat": 0.82418652259237, "lng": -0.83446480056062, "name": "Firework Launcher", "found": false}, {"id": 930148, "cat": 27068, "lat": 0.84149729445397, "lng": -0.95349424556747, "name": "First Section Gray Key Cutter", "found": false}, {"id": 930185, "cat": 27068, "lat": 0.78673786029823, "lng": -0.81685999211464, "name": "First Section Red Key Cutter", "found": false}, {"id": 930154, "cat": 27082, "lat": 0.83080054023894, "lng": -0.97096390527417, "name": "Flashlight", "found": false}, {"id": 930162, "cat": 27082, "lat": 0.79368583910532, "lng": -0.82092725371299, "name": "Flashlight", "found": false}, {"id": 930149, "cat": 27068, "lat": 0.84759061132748, "lng": -0.95615499691019, "name": "Fourth Section Gray Key Cutter", "found": false}, {"id": 930188, "cat": 27068, "lat": 0.81384098060059, "lng": -0.83227928828398, "name": "Fourth Section Red Key Cutter", "found": false}, {"id": 930138, "cat": 27070, "lat": 0.83860025668133, "lng": -0.95654010772728, "name": "Gray Key", "found": false}, {"id": 930153, "cat": 27073, "lat": 0.8343375432824, "lng": -0.96718735498251, "name": "Gray Key Holder", "found": false}, {"id": 930168, "cat": 27093, "lat": 0.79949228175401, "lng": -0.81521987914928, "name": "Laser Pointer", "found": false}, {"id": 930142, "cat": 27066, "lat": 0.84714038097715, "lng": -0.92290666166164, "name": "Locked Box Puzzle (Rød Bean)", "found": false}, {"id": 930141, "cat": 27066, "lat": 0.78170092106376, "lng": -0.87844136464869, "name": "Matching Tiles Puzzle (Rød Bean)", "found": false}, {"id": 930170, "cat": 27066, "lat": 0.69783988760682, "lng": -0.84733128547748, "name": "Maze Puzzle (Rød Bean)", "found": false}, {"id": 930184, "cat": 27066, "lat": 0.60845150704483, "lng": -0.61010172331552, "name": "Memory Puzzle (Rød Bean)", "found": false}, {"id": 930180, "cat": 27081, "lat": 0.70586445299601, "lng": -0.70920310191266, "name": "Music Player", "found": false}, {"id": 930155, "cat": 27081, "lat": 0.76097186086945, "lng": -0.93078093125615, "name": "Music Player", "found": false}, {"id": 930183, "cat": 27081, "lat": 0.67828772583525, "lng": -0.64457696824684, "name": "Music Player", "found": false}, {"id": 930156, "cat": 27069, "lat": 0.75892415868927, "lng": -0.92905601900006, "name": "Music Station 01", "found": false}, {"id": 930179, "cat": 27069, "lat": 0.70509203535575, "lng": -0.70671401194687, "name": "Music Station 03", "found": false}, {"id": 930182, "cat": 27069, "lat": 0.6784593751804, "lng": -0.6420020475926, "name": "Music Station 06", "found": false}, {"id": 930136, "cat": 27065, "lat": 0.8252483441221, "lng": -0.92606619061996, "name": "Painting Room", "found": false}, {"id": 930171, "cat": 27066, "lat": 0.73120397272278, "lng": -0.81067621707695, "name": "Point and Click Puzzle (Rød Bean)", "found": false}, {"id": 930160, "cat": 27074, "lat": 0.83456797936161, "lng": -0.83046234445237, "name": "Radio Transmitter", "found": false}, {"id": 930166, "cat": 27074, "lat": 0.79811912420199, "lng": -0.82028388976934, "name": "Radio Transmitter", "found": false}, {"id": 930164, "cat": 27070, "lat": 0.79623103181953, "lng": -0.81745147704964, "name": "Red Key", "found": false}, {"id": 930161, "cat": 27072, "lat": 0.79231001902671, "lng": -0.81852436065623, "name": "Red Tower", "found": false}, {"id": 930163, "cat": 27080, "lat": 0.79102268159328, "lng": -0.81594944000159, "name": "Scanner", "found": false}, {"id": 930135, "cat": 27080, "lat": 0.82876983782086, "lng": -0.91053083600468, "name": "Scanner", "found": false}, {"id": 930152, "cat": 27068, "lat": 0.84555055162063, "lng": -0.94654441659759, "name": "Second Section Gray Key Cutter", "found": false}, {"id": 930186, "cat": 27068, "lat": 0.76230428372115, "lng": -0.83957053693399, "name": "Second Section Red Key Cutter", "found": false}, {"id": 930133, "cat": 27066, "lat": 0.84758537169083, "lng": -0.88859054796814, "name": "Stacking Button Puzzle (Rød Bean)", "found": false}, {"id": 930137, "cat": 27065, "lat": 0.8513983661269, "lng": -0.83625912666321, "name": "Starting Hub", "found": false}, {"id": 930151, "cat": 27068, "lat": 0.85404685516991, "lng": -0.94577194040133, "name": "Third Section Gray Key Cutter", "found": false}, {"id": 930187, "cat": 27068, "lat": 0.79608231827898, "lng": -0.84115898903002, "name": "Third Section Red Key Cutter", "found": false}, {"id": 930139, "cat": 27066, "lat": 0.7847479187265, "lng": -0.9116538253223, "name": "Timing Button Puzzle (Rød Bean)", "found": false}, {"id": 930175, "cat": 27075, "lat": 0.68716127120776, "lng": -0.77838953091862, "name": "Train Station", "found": false}, {"id": 930159, "cat": 27094, "lat": 0.8375717336326, "lng": -0.83054817514085, "name": "Whiteboards", "found": false}, {"id": 930169, "cat": 27084, "lat": 0.73685760533182, "lng": -0.83914518356647, "name": "Yellow Backpack", "found": false}, {"id": 930172, "cat": 27087, "lat": 0.76116170637042, "lng": -0.8006823062893, "name": "Yellow Walkie-Talkie", "found": false}, {"id": 930201, "cat": 27092, "lat": 0.65156122841798, "lng": -0.59696244730625, "name": "Binoculars", "found": false}, {"id": 930234, "cat": 27092, "lat": 0.52658925018606, "lng": -0.54996927431694, "name": "Binoculars", "found": false}, {"id": 930238, "cat": 27066, "lat": 0.49740614583165, "lng": -0.61066097647029, "name": "Clifftop Golf Puzzle (Lilla Bean)", "found": false}, {"id": 930211, "cat": 27089, "lat": 0.57125277587495, "lng": -0.70624172687636, "name": "Clock", "found": false}, {"id": 930209, "cat": 27089, "lat": 0.53897799368056, "lng": -0.63011609001094, "name": "Clock", "found": false}, {"id": 930193, "cat": 27091, "lat": 0.8221224951462, "lng": -0.79769432544759, "name": "Compass", "found": false}, {"id": 930229, "cat": 27095, "lat": 0.63803760002958, "lng": -0.58212120021949, "name": "Coordinate Displayer", "found": false}, {"id": 930205, "cat": 27066, "lat": 0.57685196793945, "lng": -0.60844106851405, "name": "Counting Lights Puzzle (Rød Bean)", "found": false}, {"id": 930222, "cat": 27066, "lat": 0.77849579909743, "lng": -0.68386611228831, "name": "Double Press Puzzle (Rød Bean)", "found": false}, {"id": 930214, "cat": 27066, "lat": 0.53821487423289, "lng": -0.46882867813127, "name": "Far Away Lights Puzzle (Rød Bean)", "found": false}, {"id": 930215, "cat": 27079, "lat": 0.60336873566602, "lng": -0.50883791206755, "name": "Far Away Lights Puzzle Second Building", "found": false}, {"id": 930228, "cat": 27068, "lat": 0.63857515244764, "lng": -0.576326036842, "name": "Fifth Section Green Key Cutter", "found": false}, {"id": 930232, "cat": 27071, "lat": 0.52197254788524, "lng": -0.56273840131936, "name": "Firework Launcher", "found": false}, {"id": 930203, "cat": 27071, "lat": 0.65824164873258, "lng": -0.59352552126825, "name": "Firework Launcher", "found": false}, {"id": 930224, "cat": 27068, "lat": 0.64923994881826, "lng": -0.58946993196429, "name": "First Section Green Key Cutter", "found": false}, {"id": 930197, "cat": 27082, "lat": 0.65164821338732, "lng": -0.59151260855324, "name": "Flashlight", "found": false}, {"id": 930227, "cat": 27068, "lat": 0.63634369266259, "lng": -0.56885876694463, "name": "Fourth Section Green Key Cutter", "found": false}, {"id": 930199, "cat": 27070, "lat": 0.65521698615156, "lng": -0.59591226964383, "name": "Green Key", "found": false}, {"id": 930207, "cat": 27073, "lat": 0.64966388884301, "lng": -0.5702427939577, "name": "Green Key Holder", "found": false}, {"id": 930196, "cat": 27072, "lat": 0.65361427933465, "lng": -0.59338226799559, "name": "Green Tower", "found": false}, {"id": 930237, "cat": 27085, "lat": 0.45960037573813, "lng": -0.52595215289338, "name": "Hip Pack", "found": false}, {"id": 930202, "cat": 27093, "lat": 0.65464860317611, "lng": -0.59859395027149, "name": "Laser Pointer", "found": false}, {"id": 930192, "cat": 27093, "lat": 0.82100681090222, "lng": -0.79503357410488, "name": "Laser Pointers", "found": false}, {"id": 930206, "cat": 27078, "lat": 0.64829068591924, "lng": -0.57256022254779, "name": "Lift Station", "found": false}, {"id": 930216, "cat": 27079, "lat": 0.81341302774446, "lng": -0.85798884849333, "name": "Locked Box", "found": false}, {"id": 930212, "cat": 27066, "lat": 0.55694656642005, "lng": -0.65076828003006, "name": "Locked Up Puzzle (Rød Bean)", "found": false}, {"id": 930194, "cat": 27090, "lat": 0.82418221908503, "lng": -0.80001175403646, "name": "Map", "found": false}, {"id": 930191, "cat": 27065, "lat": 0.82820954785618, "lng": -0.79442384680615, "name": "Map Room", "found": false}, {"id": 930231, "cat": 27081, "lat": 0.49498669331595, "lng": -0.54113711829521, "name": "Music Player", "found": false}, {"id": 930230, "cat": 27069, "lat": 0.49696072518859, "lng": -0.54293956275194, "name": "Music Station 02", "found": false}, {"id": 930213, "cat": 27084, "lat": 0.4977151739301, "lng": -0.65518319606724, "name": "Pink Backpack", "found": false}, {"id": 930219, "cat": 27079, "lat": 0.64519878422416, "lng": -0.65866532163787, "name": "Pose Picture", "found": false}, {"id": 930220, "cat": 27079, "lat": 0.61630480573551, "lng": -0.65297943271921, "name": "Pose Picture", "found": false}, {"id": 930221, "cat": 27079, "lat": 0.60197189084586, "lng": -0.67581039585238, "name": "Pose Picture", "found": false}, {"id": 930217, "cat": 27079, "lat": 0.6819140843218, "lng": -0.69005035282066, "name": "Pose Picture", "found": false}, {"id": 930218, "cat": 27079, "lat": 0.65807255481731, "lng": -0.69720330076524, "name": "Pose Picture", "found": false}, {"id": 930195, "cat": 27066, "lat": 0.65962387599775, "lng": -0.7296824183085, "name": "Pose Puzzle (Rød Bean)", "found": false}, {"id": 930233, "cat": 27074, "lat": 0.52658925018606, "lng": -0.55411121154455, "name": "Radio Transmitter", "found": false}, {"id": 930200, "cat": 27074, "lat": 0.65046742444406, "lng": -0.59419492809815, "name": "Radio Transmitter", "found": false}, {"id": 930236, "cat": 27084, "lat": 0.46157441778816, "lng": -0.5238063856815, "name": "Red Backpack", "found": false}, {"id": 930190, "cat": 27073, "lat": 0.82694942911839, "lng": -0.81533549996385, "name": "Red Key Holder", "found": false}, {"id": 930198, "cat": 27080, "lat": 0.65516704278323, "lng": -0.59099762442239, "name": "Scanner", "found": false}, {"id": 930235, "cat": 27080, "lat": 0.52244748651857, "lng": -0.55154035395609, "name": "Scanner", "found": false}, {"id": 930225, "cat": 27068, "lat": 0.65769222618641, "lng": -0.58117821405202, "name": "Second Section Green Key Cutter", "found": false}, {"id": 930223, "cat": 27079, "lat": 0.5185076670581, "lng": -0.75451314250856, "name": "Second Switch", "found": false}, {"id": 930226, "cat": 27068, "lat": 0.6529079670602, "lng": -0.56782879868294, "name": "Third Section Green Key Cutter", "found": false}, {"id": 930208, "cat": 27075, "lat": 0.54103783871595, "lng": -0.63183270377797, "name": "Train Station", "found": false}, {"id": 930210, "cat": 27075, "lat": 0.57382756797166, "lng": -0.70641338825331, "name": "Train Station", "found": false}, {"id": 930239, "cat": 27066, "lat": 0.42279506350525, "lng": -0.61253102640225, "name": "Warehouse Puzzle (Lilla Bean)", "found": false}, {"id": 930204, "cat": 27094, "lat": 0.63277388719797, "lng": -0.58209836483027, "name": "Whiteboard", "found": false}, {"id": 930252, "cat": 27066, "lat": 0.38290675501929, "lng": -0.59329684026144, "name": "Beach House Icon Puzzle (Lilla Bean)", "found": false}, {"id": 930255, "cat": 27066, "lat": 0.36305335438783, "lng": -0.66840552269102, "name": "Beach Timer Puzzle (Lilla Bean)", "found": false}, {"id": 930282, "cat": 27092, "lat": 0.83914200483234, "lng": -0.6169241666808, "name": "Binoculars", "found": false}, {"id": 930249, "cat": 27092, "lat": 0.94595674588362, "lng": -0.75154378811717, "name": "Binoculars", "found": false}, {"id": 930279, "cat": 27070, "lat": 0.83834438811458, "lng": -0.61967830499785, "name": "Blue Key", "found": false}, {"id": 930284, "cat": 27073, "lat": 0.86544186397472, "lng": -0.62908047820667, "name": "Blue Key Holder", "found": false}, {"id": 930276, "cat": 27072, "lat": 0.83303563935326, "lng": -0.62309576032169, "name": "Blue Tower", "found": false}, {"id": 930272, "cat": 27065, "lat": 0.82701498217416, "lng": -0.63782280719994, "name": "Blue Tunnel Entrance", "found": false}, {"id": 930287, "cat": 27089, "lat": 0.85795473862511, "lng": -0.7953312663395, "name": "Clock", "found": false}, {"id": 930289, "cat": 27089, "lat": 0.68296598652017, "lng": -0.59455995971823, "name": "Clock", "found": false}, {"id": 930264, "cat": 27068, "lat": 0.8613301998689, "lng": -0.74069682199092, "name": "Fifth Section Yellow Key Cutter", "found": false}, {"id": 930247, "cat": 27071, "lat": 0.95194191775613, "lng": -0.74944674968611, "name": "Firework Launcher", "found": false}, {"id": 930280, "cat": 27071, "lat": 0.83543864388764, "lng": -0.61815319456903, "name": "Firework Launcher", "found": false}, {"id": 930260, "cat": 27068, "lat": 0.9474514457075, "lng": -0.74406082307809, "name": "First Section Yellow Key Cutter", "found": false}, {"id": 930269, "cat": 27082, "lat": 0.82547332767064, "lng": -0.64015116097596, "name": "Flashlight", "found": false}, {"id": 930266, "cat": 27082, "lat": 0.85305239259759, "lng": -0.71676602637825, "name": "Flashlight", "found": false}, {"id": 930274, "cat": 27082, "lat": 0.78365172189173, "lng": -0.78798891606829, "name": "Flashlight", "found": false}, {"id": 930277, "cat": 27082, "lat": 0.8362349838208, "lng": -0.62203512170615, "name": "Flashlight", "found": false}, {"id": 930270, "cat": 27082, "lat": 0.71594178188724, "lng": -0.60584028013307, "name": "Flashlight", "found": false}, {"id": 930245, "cat": 27082, "lat": 0.95054589171848, "lng": -0.746784388686, "name": "Flashlight", "found": false}, {"id": 930263, "cat": 27068, "lat": 0.88477223415428, "lng": -0.75600758355051, "name": "Fourth Section Yellow Key Cutter", "found": false}, {"id": 930271, "cat": 27065, "lat": 0.71268046919184, "lng": -0.60506780393681, "name": "Green Tunnel Entrance", "found": false}, {"id": 930254, "cat": 27066, "lat": 0.44003436033381, "lng": -0.64012608920623, "name": "Greenhouse Puzzle (Lilla Bean)", "found": false}, {"id": 930283, "cat": 27093, "lat": 0.84181856142752, "lng": -0.61864078045031, "name": "Laser Pointer", "found": false}, {"id": 930250, "cat": 27093, "lat": 0.94989299228426, "lng": -0.75214460293276, "name": "Laser Pointer", "found": false}, {"id": 930241, "cat": 27078, "lat": 0.81009277937348, "lng": -0.66239516288954, "name": "Lift Station", "found": false}, {"id": 930240, "cat": 27078, "lat": 0.51459362260994, "lng": -0.58502343310326, "name": "Lift Station", "found": false}, {"id": 930243, "cat": 27078, "lat": 0.99119092633671, "lng": -0.84529758022421, "name": "Lift Station", "found": false}, {"id": 930242, "cat": 27078, "lat": 0.95177677703221, "lng": -0.73317962424508, "name": "Lift Station", "found": false}, {"id": 930253, "cat": 27086, "lat": 0.39198262560524, "lng": -0.55776293523044, "name": "Megaphone", "found": false}, {"id": 930258, "cat": 27066, "lat": 0.43136703727359, "lng": -0.69586778234645, "name": "Multi-Light Puzzle (Lilla Bean)", "found": false}, {"id": 930259, "cat": 27079, "lat": 0.43915200890794, "lng": -0.68342952369832, "name": "Multi-Light Puzzle Second Building", "found": false}, {"id": 930268, "cat": 27081, "lat": 0.85248120809855, "lng": -0.70928323312555, "name": "Music Player", "found": false}, {"id": 930267, "cat": 27069, "lat": 0.85239538690925, "lng": -0.71220147653372, "name": "Music Station 05", "found": false}, {"id": 930273, "cat": 27065, "lat": 0.85267911178255, "lng": -0.70641754516441, "name": "Painting Room", "found": false}, {"id": 930290, "cat": 27065, "lat": 0.48981560472497, "lng": -0.59793558408168, "name": "Purple Tunnel Entrance", "found": false}, {"id": 930291, "cat": 27065, "lat": 0.46930278882137, "lng": -0.61355676938419, "name": "Purple Tunnel Entrance", "found": false}, {"id": 930281, "cat": 27074, "lat": 0.83615245180206, "lng": -0.61557357946549, "name": "Radio Transmitter", "found": false}, {"id": 930248, "cat": 27074, "lat": 0.94414312166708, "lng": -0.74867963790842, "name": "Radio Transmitter", "found": false}, {"id": 930275, "cat": 27065, "lat": 0.78270767252005, "lng": -0.79056383672255, "name": "Red Tunnel Entrance", "found": false}, {"id": 930278, "cat": 27080, "lat": 0.83397967702338, "lng": -0.62023267724567, "name": "Scanner", "found": false}, {"id": 930246, "cat": 27080, "lat": 0.94662352179527, "lng": -0.74669855799627, "name": "Scanner", "found": false}, {"id": 930261, "cat": 27068, "lat": 0.93689569837031, "lng": -0.74491912996282, "name": "Second Section Yellow Key Cutter", "found": false}, {"id": 930262, "cat": 27068, "lat": 0.91503228304815, "lng": -0.74549337368026, "name": "Third Section Yellow Key Cutter", "found": false}, {"id": 930285, "cat": 27075, "lat": 0.86228143594474, "lng": -0.62828878848552, "name": "Train Station", "found": false}, {"id": 930286, "cat": 27075, "lat": 0.86052936973846, "lng": -0.7964470652897, "name": "Train Station", "found": false}, {"id": 930288, "cat": 27075, "lat": 0.68459665347086, "lng": -0.59215670044094, "name": "Train Station", "found": false}, {"id": 930251, "cat": 27070, "lat": 0.94834825186091, "lng": -0.7548053542755, "name": "Yellow Key", "found": false}, {"id": 930265, "cat": 27073, "lat": 0.85360630295401, "lng": -0.72387400704974, "name": "Yellow Key Holder", "found": false}, {"id": 930244, "cat": 27072, "lat": 0.94816826298813, "lng": -0.74900820884528, "name": "Yellow Tower", "found": false}, {"id": 930319, "cat": 27066, "lat": 0.70040472160665, "lng": -0.5793699077804, "name": "50/50 Puzzle (Rød Bean)", "found": false}, {"id": 930292, "cat": 27065, "lat": 0.53860160411759, "lng": -0.71037743513173, "name": "Beach Party", "found": false}, {"id": 930306, "cat": 27092, "lat": 0.81159312951478, "lng": -0.67477491345934, "name": "Binoculars", "found": false}, {"id": 930299, "cat": 27092, "lat": 0.82777487419182, "lng": -0.73883941972306, "name": "Binoculars", "found": false}, {"id": 930315, "cat": 27070, "lat": 0.87360924783286, "lng": -0.69982354405073, "name": "Black Key", "found": false}, {"id": 930334, "cat": 27073, "lat": 1.0366484516406, "lng": -0.71608112373931, "name": "Black Key Holder", "found": false}, {"id": 930314, "cat": 27072, "lat": 0.86978672293255, "lng": -0.69959169577498, "name": "Black Tower", "found": false}, {"id": 930324, "cat": 27087, "lat": 0.64315441173611, "lng": -0.39552360787189, "name": "Blue Walkie-Talkie", "found": false}, {"id": 930301, "cat": 27087, "lat": 0.80672555105632, "lng": -0.65752356914101, "name": "Blue Walkie-Talkie", "found": false}, {"id": 930329, "cat": 27066, "lat": 0.66618838707458, "lng": -0.79508977382849, "name": "Brown Tower Puzzle (Rød Bean)", "found": false}, {"id": 930333, "cat": 27079, "lat": 0.77716193694158, "lng": -0.52500484241688, "name": "Camouflage Box Button", "found": false}, {"id": 930332, "cat": 27066, "lat": 0.75101539839864, "lng": -0.43382581259175, "name": "Camouflage Puzzle (Rød Bean)", "found": false}, {"id": 930308, "cat": 27066, "lat": 0.80968707262758, "lng": -0.75090249918006, "name": "Climbing Puzzle (Rød Bean)", "found": false}, {"id": 930323, "cat": 27088, "lat": 0.68814485154057, "lng": -0.46669048694253, "name": "Double Blob Holder", "found": false}, {"id": 930313, "cat": 27068, "lat": 0.86171374143574, "lng": -0.61574756735357, "name": "Fifth Section Blue Key Cutter", "found": false}, {"id": 930304, "cat": 27071, "lat": 0.80919011062291, "lng": -0.67288663831346, "name": "Firework Launcher", "found": false}, {"id": 930309, "cat": 27068, "lat": 0.82995984757083, "lng": -0.62493145101988, "name": "First Section Blue Key Cutter", "found": false}, {"id": 930328, "cat": 27066, "lat": 0.67975516242188, "lng": -0.42874139293275, "name": "Forget-Me-Not Puzzle (Rød Bean)", "found": false}, {"id": 930312, "cat": 27068, "lat": 0.85476223560956, "lng": -0.60244381063902, "name": "Fourth Section Blue Key Cutter", "found": false}, {"id": 930296, "cat": 27079, "lat": 0.7442654367694, "lng": -0.72680685920554, "name": "Golf Tee", "found": false}, {"id": 930294, "cat": 27084, "lat": 0.75113130718285, "lng": -0.70552084846275, "name": "Green Backpack", "found": false}, {"id": 930307, "cat": 27083, "lat": 0.79666006057823, "lng": -0.69288518872875, "name": "Green Flare Gun", "found": false}, {"id": 930331, "cat": 27066, "lat": 0.7684208249666, "lng": -0.55100786694626, "name": "Hanging Timer Puzzle (Rød Bean)", "found": false}, {"id": 930321, "cat": 27066, "lat": 0.64903534428235, "lng": -0.50051119603407, "name": "Headless Chicken Puzzle (Rød Bean)", "found": false}, {"id": 930318, "cat": 27085, "lat": 0.73670197854088, "lng": -0.60835105392295, "name": "Hip Pack", "found": false}, {"id": 930335, "cat": 27085, "lat": 0.82435975940405, "lng": -0.64292572147411, "name": "Hip Pack", "found": false}, {"id": 930297, "cat": 27085, "lat": 0.85585856148893, "lng": -0.76474506545026, "name": "Hip Pack", "found": false}, {"id": 930302, "cat": 27066, "lat": 0.86867823920063, "lng": -0.67893683243565, "name": "Interrogation Puzzle (Rød Bean)", "found": false}, {"id": 930330, "cat": 27066, "lat": 0.7410533214814, "lng": -0.4778193719018, "name": "Invisible Ink Puzzle (Rød Bean)", "found": false}, {"id": 930336, "cat": 27066, "lat": 0.81295238896647, "lng": -0.5348729418015, "name": "Little Patience Puzzle (Rød Bean)", "found": false}, {"id": 930320, "cat": 27086, "lat": 0.67614553803811, "lng": -0.52944206651884, "name": "Megaphone", "found": false}, {"id": 930305, "cat": 27081, "lat": 0.81099237492515, "lng": -0.67820814099849, "name": "Music Player", "found": false}, {"id": 930339, "cat": 27081, "lat": 0.936589881969, "lng": -0.62699045199565, "name": "Music Player", "found": false}, {"id": 930338, "cat": 27069, "lat": 0.93967937257261, "lng": -0.62724794406012, "name": "Music Station 04", "found": false}, {"id": 930337, "cat": 27079, "lat": 0.82883718695599, "lng": -0.52920453501685, "name": "Musical Camouflage Box Button", "found": false}, {"id": 930298, "cat": 27066, "lat": 0.82296885434867, "lng": -0.71781090104602, "name": "Passing Puzzle (Rød Bean)", "found": false}, {"id": 930293, "cat": 27066, "lat": 0.48930335264032, "lng": -0.70873472274522, "name": "Patience Puzzle (Lilla Bean)", "found": false}, {"id": 930303, "cat": 27074, "lat": 0.80876099995689, "lng": -0.67631986585261, "name": "Radio Transmitter", "found": false}, {"id": 930295, "cat": 27066, "lat": 0.77962455302217, "lng": -0.72251532478097, "name": "Ravine Golf Puzzle (Rød Bean)", "found": false}, {"id": 930317, "cat": 27083, "lat": 0.74609457320828, "lng": -0.67347357399947, "name": "Red Flare Gun", "found": false}, {"id": 930310, "cat": 27068, "lat": 0.83176210251693, "lng": -0.61265766256832, "name": "Second Section Blue Key Cutter", "found": false}, {"id": 930316, "cat": 27066, "lat": 0.90185712958305, "lng": -0.74198248139089, "name": "Stage Puzzle (Rød Bean)", "found": false}, {"id": 930340, "cat": 27066, "lat": 0.96696829905926, "lng": -0.60471033575138, "name": "Super Camouflage Box Puzzle (Rød Bean)", "found": false}, {"id": 930341, "cat": 27079, "lat": 0.98143260999578, "lng": -0.5608865742164, "name": "Super Camouflage Box Switch", "found": false}, {"id": 930311, "cat": 27068, "lat": 0.8502995338747, "lng": -0.61076938742113, "name": "Third Section Blue Key Cutter", "found": false}, {"id": 930325, "cat": 27066, "lat": 0.7216293507764, "lng": -0.4287132798602, "name": "Tower Puzzle (Rød Bean)", "found": false}, {"id": 930327, "cat": 27079, "lat": 0.71270365843705, "lng": -0.40133329023379, "name": "Tower Switch", "found": false}, {"id": 930326, "cat": 27079, "lat": 0.73579026894508, "lng": -0.42785497297351, "name": "Tower Switch", "found": false}, {"id": 930322, "cat": 27087, "lat": 0.64397521800554, "lng": -0.44809256770549, "name": "Yellow Walkie-Talkie", "found": false}, {"id": 930300, "cat": 27087, "lat": 0.80689719541253, "lng": -0.64421981243001, "name": "Yellow Walkie-Talkie", "found": false}, {"id": 930363, "cat": 27084, "lat": 0.88603136837801, "lng": -0.85861989625855, "name": "Blue Backpack", "found": false}, {"id": 930354, "cat": 27083, "lat": 0.90490209923368, "lng": -0.66681265663649, "name": "Blue Flare Gun", "found": false}, {"id": 930346, "cat": 27087, "lat": 0.9533954740934, "lng": -0.65010309219232, "name": "Blue Walkie-Talkie", "found": false}, {"id": 930343, "cat": 27079, "lat": 0.54647482578362, "lng": -0.59705807184815, "name": "Brown Tower Button", "found": false}, {"id": 930365, "cat": 27065, "lat": 0.84310614622784, "lng": -0.81562431283339, "name": "Checkpoint", "found": false}, {"id": 930353, "cat": 27089, "lat": 0.91433805180272, "lng": -0.67128594895422, "name": "Clock", "found": false}, {"id": 930342, "cat": 27065, "lat": 0.63556857779434, "lng": -0.5819910764688, "name": "Coordinate Sign", "found": false}, {"id": 930355, "cat": 27066, "lat": 0.95985574849114, "lng": -0.70077576065125, "name": "Double Cliff Puzzle (Rød Bean)", "found": false}, {"id": 930356, "cat": 27079, "lat": 0.95196042410585, "lng": -0.70884384536765, "name": "Double Cliff Puzzle Second Building", "found": false}, {"id": 930362, "cat": 27066, "lat": 0.91717613114487, "lng": -0.79221757346082, "name": "Hide and Seek Puzzle (Rød Bean)", "found": false}, {"id": 930351, "cat": 27085, "lat": 0.98501360031437, "lng": -0.67579738809854, "name": "Hip Pack", "found": false}, {"id": 930349, "cat": 27066, "lat": 0.9645283202922, "lng": -0.57496363187502, "name": "Large Warehouse Puzzle (Rød Bean)", "found": false}, {"id": 930347, "cat": 27066, "lat": 0.92755033725371, "lng": -0.57637918041547, "name": "Mask Maze Puzzle (Rød Bean)", "found": false}, {"id": 930357, "cat": 27086, "lat": 1.0024776456792, "lng": -0.80325088609246, "name": "Megaphone", "found": false}, {"id": 930344, "cat": 27066, "lat": 0.85198237387687, "lng": -0.56681345122161, "name": "Mountain Icon Puzzle (Rød Bean)", "found": false}, {"id": 930361, "cat": 27081, "lat": 0.94418882405051, "lng": -0.89186192461258, "name": "Music Player", "found": false}, {"id": 930367, "cat": 27081, "lat": 0.85538689840125, "lng": -0.8023242608279, "name": "Music Player", "found": false}, {"id": 930360, "cat": 27069, "lat": 0.94298735736099, "lng": -0.89409352251369, "name": "Music Station 07", "found": false}, {"id": 930370, "cat": 27066, "lat": 0.67226686084109, "lng": -0.65277012100665, "name": "Musical Camouflage Box Puzzle (Rød Bean)", "found": false}, {"id": 930369, "cat": 27066, "lat": 0.90191711831613, "lng": -0.90752694491405, "name": "Musical Chair Puzzle (Rød Bean)", "found": false}, {"id": 930359, "cat": 27066, "lat": 1.000502100111, "lng": -0.89385198955625, "name": "Musical Speaker Puzzle (Rød Bean)", "found": false}, {"id": 930348, "cat": 27084, "lat": 0.94302601716556, "lng": -0.54879179558156, "name": "Orange Backpack", "found": false}, {"id": 930350, "cat": 27066, "lat": 0.98092758321887, "lng": -0.62497229857539, "name": "Playground Puzzle (Rød Bean)", "found": false}, {"id": 930368, "cat": 27080, "lat": 0.85409278871202, "lng": -0.80000683223864, "name": "Scanner", "found": false}, {"id": 930366, "cat": 27070, "lat": 0.84357316975755, "lng": -0.78542050825925, "name": "Silver Key", "found": false}, {"id": 930371, "cat": 27073, "lat": 0.84830864685448, "lng": -0.83023345680763, "name": "Silver Key Holder", "found": false}, {"id": 930358, "cat": 27065, "lat": 0.84453953152767, "lng": -0.85788282632475, "name": "Starting Hub Entrance", "found": false}, {"id": 930352, "cat": 27075, "lat": 0.91699846336955, "lng": -0.67197259446209, "name": "Train Station", "found": false}, {"id": 930364, "cat": 27083, "lat": 0.87733096121491, "lng": -0.94223479089433, "name": "Yellow Flare Gun", "found": false}, {"id": 930345, "cat": 27087, "lat": 0.89759729400073, "lng": -0.59617008218831, "name": "Yellow Walkie-Talkie", "found": false}];
+function clonePins(arr){try{return JSON.parse(JSON.stringify(arr||[]))}catch(e){return (arr||[]).slice()}}
+function loadPins(){
+  try{
+    const s=localStorage.getItem(KEY);
+    if(s){const j=JSON.parse(s);if(Array.isArray(j)&&j.length)return j}
+  }catch(e){}
+  return clonePins(DEFAULT_PINS);
+}
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(pins));
+    localStorage.setItem(VKEY,JSON.stringify(vis));
+  }catch(e){console&&console.warn&&console.warn('save failed',e)}
+}
+function toast(m,ms=4000){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',ms)}
+
+function startApp(){
+/* initial load — pins gemmes i localStorage */
+try{
+  pins=loadPins();
+  try{vis=JSON.parse(localStorage.getItem(VKEY)||'{}')}catch(e){vis={}}
+}catch(e){pins=clonePins(DEFAULT_PINS);vis={}}
+Object.keys(cats).forEach(id=>{if(!(id in vis))vis[id]=true});
+
+/* map */
+const map=L.map('map',{center:[D.lat,D.lng],zoom:D.zoom,minZoom:D.minZoom,maxZoom:D.maxZoom,zoomControl:false,attributionControl:true});
+window._map=map;
+L.control.zoom({position:'topright'}).addTo(map);
+setTimeout(()=>map.invalidateSize(),100);
+let errs=0;
+const tl=L.tileLayer(D.tile,{minZoom:D.minZoom,maxZoom:D.maxZoom,maxNativeZoom:D.nativeMax,tileSize:256,attribution:'Mrs and Mr VikingBears Map · tiles © MapGenie'}).addTo(map);
+tl.on('tileerror',e=>{if(++errs===3){toast('Kortfliserne kan ikke hentes. Åbn filen direkte i din browser med internet. Hvis det stadig fejler, blokerer MapGenies server eksterne sider. Fliser-URL: '+(e.tile&&e.tile.src||''),20000)}});
+tl.on('tileload',()=>{errs=-1e9;$('#toast').style.display='none'});
+window.addEventListener('load',()=>setTimeout(()=>{if(location.protocol==='file:'||true){}},0));
+map.on('mousemove',e=>$('#coords').textContent=e.latlng.lat.toFixed(5)+', '+e.latlng.lng.toFixed(5));
+
+/* icons */
+function spriteStyle(id,scale){const p=D.spr[id];if(!p)return'';const k=scale/2;return `background-image:url(${SPR_URL});background-size:${SW*k}px ${SH*k}px;background-position:-${p.x*k}px -${p.y*k}px`}
+function mkIcon(p){return L.divIcon({className:'',iconSize:[33,44],iconAnchor:[16,44],popupAnchor:[0,-40],html:`<div class="pin ${p.found?'found':''}" style="${spriteStyle(p.cat,1)}"></div>`})}
+
+/* markers */
+const layer=L.layerGroup().addTo(map);const mk={};
+function render(){
+  layer.clearLayers();
+  pins.forEach(p=>{
+    if(!vis[p.cat])return;
+    const m=L.marker([p.lat,p.lng],{icon:mkIcon(p),title:p.name||cats[p.cat].title}).addTo(layer);
+    m.bindPopup(()=>popup(p));
+  });
+  counts();
+}
+window._render=render;
+function popup(p){
+  const c=cats[p.cat],d=document.createElement('div');d.className='pp';
+  d.innerHTML=`<h3></h3><div class="c"></div>${c.info?'<div class="inf"></div>':''}<input type="text" placeholder="Name / note"><label><input type="checkbox"> Found</label><div class="row"><button class="b del">Delete</button><button class="b cp">Copy coords</button></div>`;
+  d.querySelector('h3').textContent=p.name||c.title;
+  d.querySelector('.c').textContent=c.title+' · '+p.lat.toFixed(5)+', '+p.lng.toFixed(5);
+  if(c.info)d.querySelector('.inf').textContent=c.info;
+  const inp=d.querySelector('input[type=text]');inp.value=p.name||'';
+  inp.onchange=()=>{p.name=inp.value.trim();d.querySelector('h3').textContent=p.name||c.title;save()};
+  const cb=d.querySelector('input[type=checkbox]');cb.checked=!!p.found;
+  cb.onchange=()=>{p.found=cb.checked;save();map.closePopup();render()};
+  d.querySelector('.del').onclick=()=>{pins=pins.filter(x=>x!==p);save();map.closePopup();render()};
+  d.querySelector('.cp').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(p.lat+', '+p.lng);toast('Coordinates copied')};
+  return d;
+}
+
+/* sidebar */
+function buildCats(filter=''){
+  const f=filter.toLowerCase(),root=$('#cats');root.innerHTML='';
+  D.groups.forEach(g=>{
+    const list=g.categories.filter(c=>c.title.toLowerCase().includes(f));
+    if(!list.length)return;
+    const h=document.createElement('div');h.className='gh';h.textContent=g.title;root.appendChild(h);
+    const gr=document.createElement('div');gr.className='grid';
+    list.forEach(c=>{
+      const e=document.createElement('div');e.className='ci'+(vis[c.id]?' on':'')+(placing==c.id?' placing':'');e.dataset.id=c.id;
+      e.innerHTML=`<span class="ic" style="${spriteStyle(c.id,0.6)}"></span><span class="t"></span><span class="n"></span><button class="add" title="Place pin on map">+</button>`;
+      e.querySelector('.t').textContent=c.title;e.title=c.title;
+      e.onclick=ev=>{if(ev.target.classList.contains('add'))return;vis[c.id]=!vis[c.id];save();e.classList.toggle('on',vis[c.id]);render()};
+      e.querySelector('.add').onclick=()=>startPlace(c.id);
+      gr.appendChild(e);
+    });
+    root.appendChild(gr);
+  });
+  counts();
+}
+window._buildCats=buildCats;
+function counts(){
+  const per={};pins.forEach(p=>per[p.cat]=(per[p.cat]||0)+1);
+  document.querySelectorAll('.ci').forEach(e=>{const c=cats[e.dataset.id];e.querySelector('.n').textContent=(per[c.id]||0)+'/'+c.count});
+  const total=Object.values(cats).reduce((a,c)=>a+c.count,0),found=pins.filter(p=>p.found).length;
+  $('#progTxt').textContent=`${found} found · ${pins.length} pins placed · ${total} total in game`;
+  $('#progBar').style.width=Math.min(100,found/total*100)+'%';
+}
+$('#q').oninput=e=>buildCats(e.target.value);
+$('#showAll').onclick=()=>{Object.keys(vis).forEach(k=>vis[k]=true);save();buildCats($('#q').value);render()};
+$('#hideAll').onclick=()=>{Object.keys(vis).forEach(k=>vis[k]=false);save();buildCats($('#q').value);render()};
+
+/* place pins */
+function startPlace(id){placing=id;vis[id]=true;const b=$('#banner');b.innerHTML=`Click the map to place: <b>${cats[id].title}</b><button id="stop">Done</button>`;b.style.display='block';$('#stop').onclick=stopPlace;map.getContainer().style.cursor='crosshair';buildCats($('#q').value);render();if(innerWidth<=768)setSideOpen(false)}
+function stopPlace(){placing=null;$('#banner').style.display='none';map.getContainer().style.cursor='';buildCats($('#q').value)}
+map.on('click',e=>{if(!placing)return;pins.push({id:Date.now()+Math.random(),cat:placing,lat:e.latlng.lat,lng:e.latlng.lng,name:'',found:false});save();render()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')stopPlace()});
+
+/* export / import */
+$('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(pins,null,1)],{type:'application/json'}));a.download='big-walk-pins.json';a.click()};
+$('#imp').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{try{let j=JSON.parse(await e.target.files[0].text());
+  if(!Array.isArray(j))j=j.locations||(j.data&&j.data.locations)||(j.map&&j.map.locations)||[];
+  let n=0;j.forEach(p=>{const cat=+(p.cat??p.category_id),lat=parseFloat(p.lat??p.latitude),lng=parseFloat(p.lng??p.longitude);
+    if(cats[cat]&&isFinite(lat)&&isFinite(lng)){pins.push({id:Date.now()+Math.random(),cat,lat,lng,name:p.name||p.title||'',found:!!p.found});n++}});
+  save();render();toast(n?n+' pins imported':'Ingen pins fundet i filen',5000)}catch(err){toast('Ugyldig JSON-fil')}e.target.value=''};
+$('#clr').onclick=()=>{if(pins.length&&confirm('Delete all placed pins?')){pins=[];save();render()}};
+function setSideOpen(on){
+  $('#side').classList.toggle('open',!!on);
+  document.body.classList.toggle('side-open',!!on);
+  const sc=$('#scrim');if(sc)sc.classList.toggle('show',!!on);
+}
+$('#tog').onclick=()=>setSideOpen(!$('#side').classList.contains('open'));
+$('#scrim').onclick=()=>setSideOpen(false);
+window.addEventListener('resize',()=>{
+  if(window._map)setTimeout(()=>window._map.invalidateSize(),100);
+  if(innerWidth>768)setSideOpen(false);
+});
+
+buildCats();render();
+if(!pins.length)toast('Vælg en kategori og tryk "+" for at placere pins på kortet.',7000);
+else toast(pins.length+' pins indlæst.',4000);
+} /* end startApp */
+</script>
+</body>
+</html>
