@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Baghavens Feltguide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: green header panel, full-width map, then a grid of white tiles; one column on phones */
+:root{
+  --bg:#eef6ef; --surface:#ffffff; --ink:#163021; --muted:#5a6f60; --line:#d5e6d8;
+  --green:#2e8b4e; --green-dark:#1f6b3a; --green-ink:#ffffff; --green-soft:#e2f2e6;
+  --zone-a:#d7ecdb; --zone-b:#c6e4cc; --zone-c:#f4faf5; --water:#cde8e5; --haze:#e6ebd3; --upper:#f8fcf8;
+  --done:#9bb3a2;
+  --f-display:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1811; --surface:#15241a; --ink:#e6f2e9; --muted:#9db4a4; --line:#28402f;
+  --green:#4fb873; --green-dark:#1d4a2c; --green-ink:#0b1a10; --green-soft:#1c3525;
+  --zone-a:#1d3426; --zone-b:#234030; --zone-c:#132119; --water:#173432; --haze:#2a2f1f; --upper:#111d15;
+  --done:#5b7362; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1811; --surface:#15241a; --ink:#e6f2e9; --muted:#9db4a4; --line:#28402f;
+  --green:#4fb873; --green-dark:#1d4a2c; --green-ink:#0b1a10; --green-soft:#1c3525;
+  --zone-a:#1d3426; --zone-b:#234030; --zone-c:#132119; --water:#173432; --haze:#2a2f1f; --upper:#111d15;
+  --done:#5b7362; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{background:var(--green-dark);color:#ffffff;border-radius:16px;padding:22px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.eyebrow{font-size:13px;font-weight:600;opacity:.8}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:2px 0 0;text-wrap:balance}
+.lede{max-width:58ch;margin:6px 0 0;opacity:.9}
+.progress{background:rgba(255,255,255,.14);border-radius:12px;padding:10px 16px;font-weight:600}
+.progress b{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;margin-top:6px;width:180px;max-width:100%;overflow:hidden}
+.bar i{display:block;height:100%;background:#ffffff;width:0;transition:width .3s}
+
+.bench{display:flex;flex-direction:column;gap:20px}
+.mapbox{background:var(--surface);border-radius:16px;padding:16px}
+.mapbox svg{width:100%;max-width:760px;height:auto;display:block;margin:0 auto}
+.zone{stroke:var(--surface);stroke-width:3}
+.zlabel{font-weight:800;font-size:14px;fill:var(--muted);pointer-events:none}
+.divider{stroke:var(--green);stroke-width:2;stroke-dasharray:4 6}
+.dlabel{font-size:11px;font-weight:600;fill:var(--green)}
+.mk{cursor:pointer}
+.mk .shape{fill:var(--green);stroke:var(--surface);stroke-width:2.5}
+.mk.chip .shape{fill:var(--surface);stroke:var(--green);stroke-width:3}
+.mk.access .shape{fill:var(--ink);stroke:var(--surface)}
+.mk.done .shape{fill:var(--done);stroke:var(--surface)}
+.mk.active .ring{stroke:var(--green);stroke-width:3;fill:none}
+.mk .ring{fill:none;stroke:none}
+.mk:focus{outline:none}.mk:focus-visible .ring{stroke:var(--ink);stroke-width:2.5}
+.mk.dim{opacity:.18}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:14px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.note{font-size:13px;color:var(--muted);margin:6px 0 0;text-align:center}
+
+.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+input[type=search]{flex:1 1 260px;min-width:0;font:inherit;padding:10px 16px;border:2px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink)}
+input[type=search]:focus{outline:none;border-color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button,.chips label{font:600 14px var(--f-body);border:0;background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chips button[aria-pressed="true"]{background:var(--green);color:var(--green-ink)}
+.chips button:focus-visible,.chips label:focus-within{outline:2px solid var(--ink);outline-offset:2px}
+.chips input{accent-color:var(--green)}
+
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px;align-items:start}
+.card{background:var(--surface);border:2px solid transparent;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0;scroll-margin-top:16px}
+.card.active{border-color:var(--green)}
+.card.done{opacity:.75}
+.card.done h3{color:var(--done);text-decoration:line-through}
+.top{display:flex;gap:12px;align-items:flex-start}
+.top .meta{flex:1;min-width:0}
+h3{font-weight:800;font-size:20px;line-height:1.2;margin:4px 0 0;cursor:pointer}
+.tag{font-size:13px;color:var(--muted)}
+.tag em{font-style:normal;font-weight:700;color:var(--green);background:var(--green-soft);border-radius:999px;padding:1px 8px;margin-right:4px}
+.found{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap;cursor:pointer}
+.found input{accent-color:var(--green);width:18px;height:18px}
+.need{font-size:15px;margin:0}
+.need b{color:var(--green)}
+details{padding-top:2px}
+summary{cursor:pointer;font-weight:700;color:var(--green);font-size:15px}
+summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+code{font-family:var(--f-mono);font-size:13px;background:var(--green-soft);padding:1px 6px;border-radius:4px}
+.empty{color:var(--muted);padding:24px 0}
+footer{font-size:13px;color:var(--muted);padding-top:8px}
+footer a{color:var(--green)}
+footer ul{margin:6px 0 0;padding-left:18px;columns:3;column-gap:24px}
+@media (max-width:700px){footer ul{columns:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.lock{min-height:70vh;display:grid;place-items:center}
+.lock form{background:var(--green-dark);color:#ffffff;border-radius:18px;padding:28px 24px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px}
+.lock h1{margin:0}
+.lock p{margin:0;opacity:.9}
+.lock input[type=password]{font:inherit;padding:12px 16px;border-radius:999px;border:2px solid transparent;background:#ffffff;color:#163021;width:100%}
+.lock input[type=password]:focus{outline:none;border-color:#9be0b1}
+.lock button{font:800 16px var(--f-body);background:#ffffff;color:#1f6b3a;border:0;border-radius:999px;padding:12px 16px;cursor:pointer}
+.lock button:disabled{opacity:.6;cursor:wait}
+.lock button:focus-visible{outline:3px solid #9be0b1;outline-offset:2px}
+.lock .remember{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+.lock .remember input{accent-color:#ffffff;width:18px;height:18px}
+.lock .err{background:rgba(255,255,255,.16);border-radius:10px;padding:8px 12px;font-weight:600}
+.lockout{font:600 14px var(--f-body);background:var(--surface);color:var(--green);border:0;border-radius:999px;padding:7px 14px;cursor:pointer}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<div class="lock" id="lock">
+  <form id="lockform" autocomplete="off">
+    <div class="eyebrow">Grounded · Baghaven</div>
+    <h1>Baghavens Feltguide</h1>
+    <p>Siden er låst. Skriv gruppens adgangskode for at åbne guiden.</p>
+    <label for="pw" class="eyebrow" style="opacity:1">Adgangskode</label>
+    <input type="password" id="pw" autocomplete="current-password" required>
+    <label class="remember"><input type="checkbox" id="remember"> Husk mig på denne enhed</label>
+    <div class="err" id="err" hidden>Forkert adgangskode. Tjek stavningen og bindestregerne, og prøv igen.</div>
+    <button type="submit" id="unlock">Lås op</button>
+  </form>
+</div>
+<div class="wrap" hidden>
+  <header>
+    <div>
+      <div class="eyebrow">Grounded · Baghaven</div>
+      <h1>Baghavens Feltguide</h1>
+      <p class="lede">Laboratorier, BURG.L-chips og de steder, der skal låses op. Klik på et punkt på kortet eller et navn i listen, og fold "Sådan kommer du ind" ud, når I vil have hjælp.</p>
+    </div>
+    <div class="progress">
+      <div><b id="cnt">0</b> / <span id="tot">0</span> fundet</div>
+      <div class="bar"><i id="barfill"></i></div>
+      <button type="button" class="lockout" id="lockout" style="margin-top:10px">Lås siden igen</button>
+    </div>
+  </header>
+
+  <div class="bench">
+    <section class="mapbox" aria-label="Skematisk kort over gården">
+      <svg id="map" viewBox="0 0 600 520" role="img" aria-label="Skematisk kort: øvre gård øverst, nedre gård nederst">
+        <!-- upper yard -->
+        <rect class="zone" x="10" y="10" width="580" height="190" rx="10" style="fill:var(--upper)"/>
+        <rect class="zone" x="20" y="20" width="170" height="95" rx="8" style="fill:var(--zone-a)"/>
+        <text class="zlabel" x="30" y="42">Skur / Undershed</text>
+        <rect class="zone" x="20" y="122" width="150" height="70" rx="8" style="fill:var(--zone-b)"/>
+        <text class="zlabel" x="30" y="144">Brændestabel</text>
+        <rect class="zone" x="198" y="20" width="100" height="100" rx="8" style="fill:var(--haze)"/>
+        <text class="zlabel" x="208" y="42">BBQ Spill</text>
+        <rect class="zone" x="305" y="20" width="170" height="172" rx="8" style="fill:var(--zone-a)"/>
+        <text class="zlabel" x="315" y="42">Upper Grasslands</text>
+        <rect class="zone" x="482" y="20" width="98" height="150" rx="8" style="fill:var(--water)"/>
+        <text class="zlabel" x="490" y="42">Moldorc</text>
+        <line class="divider" x1="10" y1="206" x2="590" y2="206"/>
+        <text class="dlabel" x="16" y="222">Øvre gård ↑ · Nedre gård ↓</text>
+        <!-- lower yard -->
+        <rect class="zone" x="10" y="212" width="580" height="298" rx="10" style="fill:var(--zone-c)"/>
+        <rect class="zone" x="20" y="232" width="120" height="90" rx="8" style="fill:var(--zone-b)"/>
+        <text class="zlabel" x="30" y="254">Skraldebunke</text>
+        <rect class="zone" x="148" y="232" width="120" height="80" rx="8" style="fill:var(--zone-a)"/>
+        <text class="zlabel" x="158" y="254">Picnicbord</text>
+        <rect class="zone" x="20" y="400" width="150" height="100" rx="8" style="fill:var(--haze)"/>
+        <text class="zlabel" x="30" y="422">Sandkasse</text>
+        <rect class="zone" x="178" y="380" width="120" height="120" rx="8" style="fill:var(--haze)"/>
+        <text class="zlabel" x="188" y="402">Haze</text>
+        <rect class="zone" x="300" y="226" width="100" height="70" rx="8" style="fill:var(--zone-b)"/>
+        <text class="zlabel" x="310" y="248">Oak Hill</text>
+        <text class="zlabel" x="320" y="350" style="font-size:18px">Grasslands</text>
+        <rect class="zone" x="420" y="226" width="160" height="110" rx="40" style="fill:var(--water)"/>
+        <text class="zlabel" x="436" y="250">Koi-damm</text>
+        <rect class="zone" x="490" y="345" width="90" height="155" rx="8" style="fill:var(--zone-b)"/>
+        <text class="zlabel" x="500" y="367">Hækken</text>
+        <g id="markers"></g>
+      </svg>
+      <div class="legend">
+        <span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--green)"/></svg>Laboratorium</span>
+        <span><svg width="14" height="14"><rect x="2" y="2" width="10" height="10" transform="rotate(45 7 7)" fill="var(--surface)" stroke="var(--green)" stroke-width="2"/></svg>BURG.L-chip</span>
+        <span><svg width="14" height="14"><rect x="1" y="1" width="12" height="12" rx="2" fill="var(--ink)"/></svg>Adgang / genvej</span>
+        <span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--done)"/></svg>Fundet</span>
+      </div>
+      <p class="note">Kortet er skematisk. Områderne ligger omtrent som i spillet (øst/vest, øvre/nedre gård), men afstande og former er ikke målfaste.</p>
+    </section>
+
+    <section aria-label="Steder og genstande">
+      <div class="tools">
+        <input id="q" type="search" placeholder="Søg, f.eks. haze, chip, gas mask, nøgle" aria-label="Søg">
+        <div class="chips" role="group" aria-label="Filtrér">
+          <button type="button" id="f-all" data-f="all" aria-pressed="true">Alle</button>
+          <button type="button" id="f-lab" data-f="lab" aria-pressed="false">Laboratorier</button>
+          <button type="button" id="f-chip" data-f="chip" aria-pressed="false">BURG.L-chips</button>
+          <button type="button" id="f-access" data-f="access" aria-pressed="false">Adgang</button>
+          <label><input type="checkbox" id="hide-done"> Skjul fundne</label>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+  </div>
+
+  <footer>
+    Beskrivelserne er skrevet med egne ord ud fra Grounded Wiki (wiki.gg), hvis indhold er under licensen CC BY-SA 4.0. Afkrydsninger gemmes kun i den browser, I sidder i.
+    <ul>
+      <li><a href="https://grounded.wiki.gg/wiki/Backyard" target="_blank" rel="noopener">Backyard</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Oak_Lab" target="_blank" rel="noopener">Oak Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Hedge_Lab" target="_blank" rel="noopener">Hedge Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Haze_Lab" target="_blank" rel="noopener">Haze Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Pond_Lab" target="_blank" rel="noopener">Pond Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Black_Anthill_Lab" target="_blank" rel="noopener">Black Anthill Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Sandbox_Lab_Outpost" target="_blank" rel="noopener">Sandbox Lab Outpost</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Undershed_Lab" target="_blank" rel="noopener">Undershed Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Mysterious_Lab" target="_blank" rel="noopener">Mysterious Lab</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Minotaur_Maze%27s_End" target="_blank" rel="noopener">Minotaur Maze's End</a></li>
+      <li><a href="https://grounded.wiki.gg/wiki/Termite_Den" target="_blank" rel="noopener">Termite Den</a></li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+const W = 'https://grounded.wiki.gg/wiki/';
+const VAULT = {salt:"0NqH3qUKmwV8xd9/3Lr5FA==", iv:"LTHjAlo7zqkpAM0k", ct:"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", iter:600000};
+let DATA = [];
+
+const KEY='gfg-found-v1';
+let found={};
+try{found=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){found={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(found))}catch(e){}}
+
+let filter='all', active=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const catName={lab:'Laboratorium',chip:'BURG.L-chip',access:'Adgang'};
+
+function markerShape(d){
+  if(d.cat==='chip') return `<rect class="shape" x="-7" y="-7" width="14" height="14" transform="rotate(45)"/>`;
+  if(d.cat==='access') return `<rect class="shape" x="-7" y="-7" width="14" height="14" rx="3"/>`;
+  return `<circle class="shape" r="8"/>`;
+}
+function renderMarkers(){
+  $('#markers').innerHTML=DATA.map(d=>`<g class="mk ${d.cat}" data-id="${d.id}" transform="translate(${d.x} ${d.y})" tabindex="0" role="button" aria-label="${esc(d.name)}"><circle class="ring" r="14"/>${markerShape(d)}<title>${esc(d.name)}</title></g>`).join('');
+  document.querySelectorAll('.mk').forEach(g=>{
+    g.addEventListener('click',()=>select(g.dataset.id,true));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(g.dataset.id,true)}});
+  });
+}
+function matches(d,q){
+  if(filter!=='all'&&d.cat!==filter) return false;
+  if($('#hide-done').checked&&found[d.id]) return false;
+  if(!q) return true;
+  const hay=(d.name+' '+d.zone+' '+d.need+' '+d.steps.join(' ')+' '+catName[d.cat]).toLowerCase();
+  return q.split(/\s+/).every(w=>hay.includes(w));
+}
+function render(){
+  const q=$('#q').value.trim().toLowerCase();
+  const vis=DATA.filter(d=>matches(d,q));
+  const ids=new Set(vis.map(d=>d.id));
+  $('#list').innerHTML=vis.length?vis.map(d=>`
+   <article class="card ${found[d.id]?'done':''} ${active===d.id?'active':''}" id="c-${d.id}">
+    <div class="top">
+     <div class="meta">
+      <div class="tag"><em>${catName[d.cat]}</em> · ${esc(d.zone)}</div>
+      <h3 data-id="${d.id}">${esc(d.name)}</h3>
+     </div>
+     <label class="found"><input type="checkbox" id="chk-${d.id}" data-id="${d.id}" ${found[d.id]?'checked':''}> Fundet</label>
+    </div>
+    <p class="need"><b>Kræver:</b> ${esc(d.need)}</p>
+    <details id="det-${d.id}"><summary>Sådan kommer du ind</summary>
+     <ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+     ${d.secret?`<details style="border:0;margin-top:8px"><summary>${esc(d.secret.label)}</summary><p style="margin:6px 0 0"><code>${esc(d.secret.text)}</code></p></details>`:''}
+     <p class="tag" style="margin:10px 0 0">Kilde: <a href="${W+d.src}" target="_blank" rel="noopener" style="color:var(--green)">Grounded Wiki</a></p>
+    </details>
+   </article>`).join(''):'<p class="empty">Ingen steder matcher søgningen. Prøv et andet ord eller vælg "Alle".</p>';
+  document.querySelectorAll('.mk').forEach(g=>{
+    const id=g.dataset.id;
+    g.classList.toggle('dim',!ids.has(id));
+    g.classList.toggle('done',!!found[id]);
+    g.classList.toggle('active',active===id);
+  });
+  document.querySelectorAll('.found input').forEach(c=>c.addEventListener('change',()=>{
+    if(c.checked) found[c.dataset.id]=true; else delete found[c.dataset.id];
+    save(); render(); stats();
+  }));
+  document.querySelectorAll('h3[data-id]').forEach(h=>h.addEventListener('click',()=>select(h.dataset.id,false)));
+}
+function select(id,scroll){
+  active=id;
+  if($('#hide-done').checked&&found[id]) $('#hide-done').checked=false;
+  const d=DATA.find(x=>x.id===id);
+  if(d&&filter!=='all'&&d.cat!==filter){setFilter('all')}
+  if(d&&!matches(d,$('#q').value.trim().toLowerCase())) $('#q').value='';
+  render();
+  const det=document.getElementById('det-'+id); if(det) det.open=true;
+  const card=document.getElementById('c-'+id);
+  if(card&&scroll) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('.chips button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===f)));
+}
+function stats(){
+  const n=DATA.filter(d=>found[d.id]).length;
+  $('#cnt').textContent=n; $('#tot').textContent=DATA.length;
+  $('#barfill').style.width=(100*n/DATA.length)+'%';
+}
+document.querySelectorAll('.chips button').forEach(b=>b.addEventListener('click',()=>{setFilter(b.dataset.f);render()}));
+$('#q').addEventListener('input',render);
+$('#hide-done').addEventListener('change',render);
+const KKEY='gfg-key-v1';
+const b64d=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+async function decryptWith(key){
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(VAULT.iv)},key,b64d(VAULT.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function keyFromPassword(pw){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(VAULT.salt),iterations:VAULT.iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']);
+}
+function openGuide(data){
+  DATA=data;
+  $('#lock').hidden=true; document.querySelector('.wrap').hidden=false;
+  renderMarkers(); render(); stats();
+}
+$('#lockform').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=$('#unlock'); btn.disabled=true; btn.textContent='Åbner …'; $('#err').hidden=true;
+  try{
+    const key=await keyFromPassword($('#pw').value.trim());
+    const data=await decryptWith(key);
+    if($('#remember').checked){
+      try{const raw=new Uint8Array(await crypto.subtle.exportKey('raw',key));localStorage.setItem(KKEY,btoa(String.fromCharCode(...raw)))}catch(_){}
+    }
+    $('#pw').value=''; openGuide(data);
+  }catch(_){
+    $('#err').hidden=false; $('#pw').select();
+  }finally{btn.disabled=false; btn.textContent='Lås op'}
+});
+$('#lockout').addEventListener('click',()=>{
+  try{localStorage.removeItem(KKEY)}catch(_){}
+  DATA=[]; $('#list').innerHTML=''; $('#markers').innerHTML='';
+  document.querySelector('.wrap').hidden=true; $('#lock').hidden=false; $('#pw').focus();
+});
+(async()=>{
+  let saved=null; try{saved=localStorage.getItem(KKEY)}catch(_){}
+  if(saved){
+    try{const key=await crypto.subtle.importKey('raw',b64d(saved),'AES-GCM',false,['decrypt']);openGuide(await decryptWith(key));return}
+    catch(_){try{localStorage.removeItem(KKEY)}catch(__){}}
+  }
+  $('#pw').focus();
+})();
+</script>
+
+</body>
+</html>
