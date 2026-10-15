@@ -141,7 +141,7 @@ footer ul{margin:6px 0 0;padding-left:18px;columns:3;column-gap:24px}
 
   <div class="bench">
     <section class="mapbox" aria-label="Skematisk kort over gården">
-      <svg id="map" viewBox="0 0 600 520" role="img" aria-label="Skematisk kort: øvre gård øverst, nedre gård nederst">
+      <svg id="map" viewBox="0 0 600 520" role="group" aria-label="Skematisk kort: øvre gård øverst, nedre gård nederst">
         <!-- upper yard -->
         <rect class="zone" x="10" y="10" width="580" height="190" rx="10" style="fill:var(--upper)"/>
         <rect class="zone" x="20" y="20" width="170" height="95" rx="8" style="fill:var(--zone-a)"/>
@@ -238,7 +238,7 @@ function markerShape(d){
   return `<circle class="shape" r="8"/>`;
 }
 function renderMarkers(){
-  $('#markers').innerHTML=DATA.map(d=>`<g class="mk ${d.cat}" data-id="${d.id}" transform="translate(${d.x} ${d.y})" tabindex="0" role="button" aria-label="${esc(d.name)}"><circle class="ring" r="14"/>${markerShape(d)}<title>${esc(d.name)}</title></g>`).join('');
+  $('#markers').innerHTML=DATA.map(d=>`<g class="mk ${esc(d.cat)}" data-id="${esc(d.id)}" transform="translate(${d.x} ${d.y})" tabindex="0" role="button" aria-label="${esc(d.name)}"><circle class="ring" r="14"/>${markerShape(d)}<title>${esc(d.name)}</title></g>`).join('');
   document.querySelectorAll('.mk').forEach(g=>{
     g.addEventListener('click',()=>select(g.dataset.id,true));
     g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(g.dataset.id,true)}});
@@ -248,7 +248,7 @@ function matches(d,q){
   if(filter!=='all'&&d.cat!==filter) return false;
   if($('#hide-done').checked&&found[d.id]) return false;
   if(!q) return true;
-  const hay=(d.name+' '+d.zone+' '+d.need+' '+d.steps.join(' ')+' '+catName[d.cat]).toLowerCase();
+  const hay=(d.name+' '+d.zone+' '+d.need+' '+(d.steps||[]).join(' ')+' '+(catName[d.cat]||'')).toLowerCase();
   return q.split(/\s+/).every(w=>hay.includes(w));
 }
 function render(){
@@ -256,19 +256,19 @@ function render(){
   const vis=DATA.filter(d=>matches(d,q));
   const ids=new Set(vis.map(d=>d.id));
   $('#list').innerHTML=vis.length?vis.map(d=>`
-   <article class="card ${found[d.id]?'done':''} ${active===d.id?'active':''}" id="c-${d.id}">
+   <article class="card ${found[d.id]?'done':''} ${active===d.id?'active':''}" id="c-${esc(d.id)}">
     <div class="top">
      <div class="meta">
-      <div class="tag"><em>${catName[d.cat]}</em> · ${esc(d.zone)}</div>
-      <h3 data-id="${d.id}">${esc(d.name)}</h3>
+      <div class="tag"><em>${esc(catName[d.cat]||d.cat)}</em> · ${esc(d.zone)}</div>
+      <h3 data-id="${esc(d.id)}">${esc(d.name)}</h3>
      </div>
-     <label class="found"><input type="checkbox" id="chk-${d.id}" data-id="${d.id}" ${found[d.id]?'checked':''}> Fundet</label>
+     <label class="found"><input type="checkbox" id="chk-${esc(d.id)}" data-id="${esc(d.id)}" ${found[d.id]?'checked':''}> Fundet</label>
     </div>
     <p class="need"><b>Kræver:</b> ${esc(d.need)}</p>
-    <details id="det-${d.id}"><summary>Sådan kommer du ind</summary>
-     <ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    <details id="det-${esc(d.id)}"><summary>Sådan kommer du ind</summary>
+     <ol>${(d.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
      ${d.secret?`<details style="border:0;margin-top:8px"><summary>${esc(d.secret.label)}</summary><p style="margin:6px 0 0"><code>${esc(d.secret.text)}</code></p></details>`:''}
-     <p class="tag" style="margin:10px 0 0">Kilde: <a href="${W+d.src}" target="_blank" rel="noopener" style="color:var(--green)">Grounded Wiki</a></p>
+     <p class="tag" style="margin:10px 0 0">Kilde: <a href="${esc(W+d.src)}" target="_blank" rel="noopener" style="color:var(--green)">Grounded Wiki</a></p>
     </details>
    </article>`).join(''):'<p class="empty">Ingen steder matcher søgningen. Prøv et andet ord eller vælg "Alle".</p>';
   document.querySelectorAll('.mk').forEach(g=>{
@@ -301,7 +301,7 @@ function setFilter(f){
 function stats(){
   const n=DATA.filter(d=>found[d.id]).length;
   $('#cnt').textContent=n; $('#tot').textContent=DATA.length;
-  $('#barfill').style.width=(100*n/DATA.length)+'%';
+  $('#barfill').style.width=(DATA.length?100*n/DATA.length:0)+'%';
 }
 document.querySelectorAll('.chips button').forEach(b=>b.addEventListener('click',()=>{setFilter(b.dataset.f);render()}));
 $('#q').addEventListener('input',render);
@@ -337,7 +337,8 @@ $('#lockform').addEventListener('submit',async e=>{
 });
 $('#lockout').addEventListener('click',()=>{
   try{localStorage.removeItem(KKEY)}catch(_){}
-  DATA=[]; $('#list').innerHTML=''; $('#markers').innerHTML='';
+  DATA=[]; active=null; setFilter('all'); $('#q').value='';
+  $('#list').innerHTML=''; $('#markers').innerHTML='';
   document.querySelector('.wrap').hidden=true; $('#lock').hidden=false; $('#pw').focus();
 });
 (async()=>{
