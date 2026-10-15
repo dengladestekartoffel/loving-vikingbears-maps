@@ -1,0 +1,30 @@
+Baghavens Feltguide
+Copyright © 2026 [Jeres navne]. Alle rettigheder forbeholdes.
+
+Kildekoden, designet og layoutet i dette repository tilhører ophavspersonerne
+ovenfor. Der gives ingen licens. Det er ikke tilladt at kopiere, ændre,
+distribuere, udgive eller på anden måde bruge hele eller dele af dette
+indhold uden skriftlig tilladelse fra ophavspersonerne.
+
+At repositoryet kan ses på GitHub giver kun de rettigheder, som følger af
+GitHubs egne vilkår (at se og forke repositoryet på GitHub). Det giver ikke
+ret til at bruge indholdet andre steder.
+
+Undtagelser
+-----------
+1. Spilinformation
+   Beskrivelserne af steder, genstande og ruter i spillet bygger på
+   Grounded Wiki (https://grounded.wiki.gg). Wikiens indhold er udgivet
+   under Creative Commons Attribution-ShareAlike 4.0
+   (https://creativecommons.org/licenses/by-sa/4.0/). I det omfang
+   beskrivelserne er en bearbejdelse af wikiens tekst, gælder den licens
+   for netop de dele, og ikke forbeholdet ovenfor.
+
+2. Varemærker
+   "Grounded" og navne på steder, figurer og genstande i spillet tilhører
+   Obsidian Entertainment og Microsoft. Dette er et uofficielt fanprojekt
+   uden tilknytning til eller godkendelse fra dem.
+
+Kontakt
+-------
+Spørgsmål om tilladelse kan sendes til: [jeres e-mail eller GitHub-brugernavn]
